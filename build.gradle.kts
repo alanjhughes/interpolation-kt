@@ -4,6 +4,7 @@ plugins {
     java
     kotlin("jvm") version "1.7.10"
     `maven-publish`
+    id("org.jlleitschuh.gradle.ktlint-idea") version "10.3.0"
 }
 
 group = "com.alanhughes"
@@ -28,7 +29,7 @@ tasks.withType<KotlinCompile> {
 publishing {
     publications {
         create<MavenPublication>("maven") {
-            groupId = "com.alanhughes"
+            groupId = "com.alanhughes.interpolation"
             artifactId = "interpolation-kt"
             version = "0.1.0"
 
