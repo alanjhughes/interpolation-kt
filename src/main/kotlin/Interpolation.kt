@@ -1,18 +1,16 @@
-import java.lang.IllegalArgumentException
-
 class Interpolation {
     companion object {
         fun interpolate(
             x: Float,
             input: List<Float>,
             output: List<Float>,
-            type: ExtrapolationConfig
+            config: ExtrapolationConfig
         ): Float {
             checkInputsSize(input.size, output.size)
 
             val narrowedInput = parseNarrowedInput(x, input, output)
 
-            return internalInterpolate(x, narrowedInput, type)
+            return internalInterpolate(x, narrowedInput, config)
         }
 
         fun interpolate(
@@ -23,11 +21,41 @@ class Interpolation {
         ): Float {
             checkInputsSize(input.size, output.size)
 
-            val extrapolationConfig = type.requiredConfigFromType()
+            val extrapolationConfig = type.configFromType()
 
             val narrowedInput = parseNarrowedInput(x, input, output)
 
             return internalInterpolate(x, narrowedInput, extrapolationConfig)
+        }
+
+        @JvmName("interpolateInt")
+        fun interpolate(
+            x: Float,
+            input: List<Int>,
+            output: List<Int>,
+            type: Extrapolation = Extrapolation.EXTEND
+        ): Float {
+            checkInputsSize(input.size, output.size)
+
+            val extrapolationConfig = type.configFromType()
+
+            val narrowedInput = parseNarrowedInput(x, input.map { it.toFloat() }, output.map { it.toFloat() })
+
+            return internalInterpolate(x, narrowedInput, extrapolationConfig)
+        }
+
+        @JvmName("interpolateInt")
+        fun interpolate(
+            x: Float,
+            input: List<Int>,
+            output: List<Int>,
+            config: ExtrapolationConfig
+        ): Float {
+            checkInputsSize(input.size, output.size)
+
+            val narrowedInput = parseNarrowedInput(x, input.map { it.toFloat() }, output.map { it.toFloat() })
+
+            return internalInterpolate(x, narrowedInput, config)
         }
     }
 }
@@ -66,25 +94,25 @@ private fun parseNarrowedInput(
 }
 
 private fun internalInterpolate(
-    x: Float,
+    input: Float,
     narrowedInput: InterpolatedInput,
     extrapolationConfig: ExtrapolationConfig
 ): Float {
-    val (leftEdgeInput, rightEdgeInput, leftEdgeOutput, rightEdgeOutput) = narrowedInput
+    val (x1, y1, x2, y2) = narrowedInput
 
-    if (rightEdgeInput - leftEdgeInput == 0f) return leftEdgeOutput
+    if (y1 - x1 == 0f) return x2
 
-    val progress = (x - leftEdgeInput) / (rightEdgeInput - leftEdgeInput)
-    val value = leftEdgeOutput + progress * (rightEdgeOutput - leftEdgeOutput)
-    val coefficient = if (rightEdgeOutput >= leftEdgeOutput) 1 else -1
+    val progress = (input - x1) / (y1 - x1)
+    val value = x2 + progress * (y2 - x2)
+    val coefficient = if (y2 >= x2) 1 else -1
 
     return when {
-        coefficient * value < coefficient * leftEdgeOutput -> getValue(
-            extrapolationConfig.extrapolateLeft, coefficient, value, leftEdgeOutput, rightEdgeOutput, x
+        coefficient * value < coefficient * x2 -> getValue(
+            extrapolationConfig.extrapolateLeft, coefficient, value, x2, y2, input
         )
 
-        coefficient * value > coefficient * rightEdgeOutput -> getValue(
-            extrapolationConfig.extrapolateRight, coefficient, value, leftEdgeOutput, rightEdgeOutput, x
+        coefficient * value > coefficient * y2 -> getValue(
+            extrapolationConfig.extrapolateRight, coefficient, value, x2, y2, input
         )
 
         else -> value
@@ -105,8 +133,8 @@ private fun getValue(
 }
 
 private fun checkInputsSize(inputSize: Int, outputSize: Int) {
-    if (inputSize < 2 || outputSize < 2) {
-        throw IllegalArgumentException("Interpolation input and output should contain at least two values")
+    require(inputSize < 2 || outputSize < 2) {
+        "Interpolation input and output should contain at least two values"
     }
 }
 
@@ -114,10 +142,10 @@ enum class Extrapolation {
     IDENTITY, CLAMP, EXTEND
 }
 
-private fun Extrapolation.requiredConfigFromType() = when (this) {
-    Extrapolation.EXTEND -> RequiredExtrapolationConfig()
-    Extrapolation.CLAMP -> RequiredExtrapolationConfig(Extrapolation.CLAMP, Extrapolation.CLAMP)
-    Extrapolation.IDENTITY -> RequiredExtrapolationConfig(Extrapolation.IDENTITY, Extrapolation.IDENTITY)
+private fun Extrapolation.configFromType() = when (this) {
+    Extrapolation.EXTEND -> ExtrapolationConfig()
+    Extrapolation.CLAMP -> ExtrapolationConfig(Extrapolation.CLAMP, Extrapolation.CLAMP)
+    Extrapolation.IDENTITY -> ExtrapolationConfig(Extrapolation.IDENTITY, Extrapolation.IDENTITY)
 }
 
 private data class InterpolatedInput(
@@ -127,9 +155,7 @@ private data class InterpolatedInput(
     var y2: Float
 )
 
-data class RequiredExtrapolationConfig(
+data class ExtrapolationConfig(
     var extrapolateLeft: Extrapolation = Extrapolation.EXTEND,
     var extrapolateRight: Extrapolation = Extrapolation.EXTEND
 )
-
-typealias ExtrapolationConfig = RequiredExtrapolationConfig
