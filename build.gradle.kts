@@ -28,7 +28,7 @@ publishing {
         create<MavenPublication>("maven") {
             groupId = "com.alanjhughes"
             artifactId = "interpolation-kt"
-            version = "0.8.0"
+            version = "0.9.0"
 
             from(components["java"])
         }
