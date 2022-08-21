@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "com.alanhughes"
-version = "0.1.0-SNAPSHOT"
+version = "0.2.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
@@ -29,9 +29,9 @@ tasks.withType<KotlinCompile> {
 publishing {
     publications {
         create<MavenPublication>("maven") {
-            groupId = "com.alanhughes.interpolation"
+            groupId = "com.alanhughes"
             artifactId = "interpolation-kt"
-            version = "0.1.0"
+            version = "0.2.0"
 
             from(components["java"])
         }
