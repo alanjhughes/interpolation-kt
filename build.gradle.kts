@@ -7,6 +7,9 @@ plugins {
     id("org.jlleitschuh.gradle.ktlint") version "10.3.0"
 }
 
+group = "com.github.alanhughes"
+version = "0.7.0"
+
 repositories {
     mavenCentral()
 }
@@ -26,9 +29,6 @@ tasks.withType<KotlinCompile> {
 publishing {
     publications {
         create<MavenPublication>("maven") {
-            groupId = "com.alanhughes"
-            artifactId = "interpolation-kt"
-            version = "0.6.0"
 
             from(components["java"])
         }
