@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "com.alanhughes"
-version = "0.2.0-SNAPSHOT"
+version = "0.3.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
@@ -31,7 +31,7 @@ publishing {
         create<MavenPublication>("maven") {
             groupId = "com.alanhughes"
             artifactId = "interpolation-kt"
-            version = "0.2.0"
+            version = "0.3.0"
 
             from(components["java"])
         }

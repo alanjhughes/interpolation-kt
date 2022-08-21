@@ -1,2 +1,2 @@
 
-rootProject.name = "Interpolation"
+rootProject.name = "interpolation-kt"
