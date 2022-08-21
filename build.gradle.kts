@@ -7,9 +7,6 @@ plugins {
     id("org.jlleitschuh.gradle.ktlint") version "10.3.0"
 }
 
-group = "com.alanhughes"
-version = "0.3.0-SNAPSHOT"
-
 repositories {
     mavenCentral()
 }
