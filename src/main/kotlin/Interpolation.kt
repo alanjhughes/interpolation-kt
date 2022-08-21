@@ -133,8 +133,8 @@ private fun getValue(
 }
 
 private fun checkInputsSize(inputSize: Int, outputSize: Int) {
-    require(inputSize < 2 || outputSize < 2) {
-        "Interpolation input and output should contain at least two values"
+    if (inputSize < 2 || outputSize < 2) {
+        throw IllegalArgumentException("Interpolation input and output should contain at least two values")
     }
 }
 
