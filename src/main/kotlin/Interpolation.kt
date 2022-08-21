@@ -1,10 +1,12 @@
 import java.lang.IllegalArgumentException
 
-
 class Interpolation {
     companion object {
         fun interpolate(
-            x: Float, input: List<Float>, output: List<Float>, type: ExtrapolationConfig
+            x: Float,
+            input: List<Float>,
+            output: List<Float>,
+            type: ExtrapolationConfig
         ): Float {
             checkInputsSize(input.size, output.size)
 
@@ -14,7 +16,10 @@ class Interpolation {
         }
 
         fun interpolate(
-            x: Float, input: List<Float>, output: List<Float>, type: Extrapolation = Extrapolation.EXTEND
+            x: Float,
+            input: List<Float>,
+            output: List<Float>,
+            type: Extrapolation = Extrapolation.EXTEND
         ): Float {
             checkInputsSize(input.size, output.size)
 
@@ -61,7 +66,9 @@ private fun parseNarrowedInput(
 }
 
 private fun internalInterpolate(
-    x: Float, narrowedInput: InterpolatedInput, extrapolationConfig: RequiredExtrapolationConfig
+    x: Float,
+    narrowedInput: InterpolatedInput,
+    extrapolationConfig: ExtrapolationConfig
 ): Float {
     val (leftEdgeInput, rightEdgeInput, leftEdgeOutput, rightEdgeOutput) = narrowedInput
 
@@ -69,14 +76,14 @@ private fun internalInterpolate(
 
     val progress = (x - leftEdgeInput) / (rightEdgeInput - leftEdgeInput)
     val value = leftEdgeOutput + progress * (rightEdgeOutput - leftEdgeOutput)
-    val coefficient = if (rightEdgeOutput >= leftEdgeOutput) 1f else -1f
+    val coefficient = if (rightEdgeOutput >= leftEdgeOutput) 1 else -1
 
     return when {
-        coefficient * value < coefficient * leftEdgeOutput -> getVal(
+        coefficient * value < coefficient * leftEdgeOutput -> getValue(
             extrapolationConfig.extrapolateLeft, coefficient, value, leftEdgeOutput, rightEdgeOutput, x
         )
 
-        coefficient * value > coefficient * rightEdgeOutput -> getVal(
+        coefficient * value > coefficient * rightEdgeOutput -> getValue(
             extrapolationConfig.extrapolateRight, coefficient, value, leftEdgeOutput, rightEdgeOutput, x
         )
 
@@ -84,18 +91,17 @@ private fun internalInterpolate(
     }
 }
 
-private fun getVal(
-    type: Extrapolation, coefficient: Float, value: Float, leftEdgeOutput: Float, rightEdgeOutput: Float, x: Float
+private fun getValue(
+    type: Extrapolation,
+    coefficient: Int,
+    value: Float,
+    leftEdgeOutput: Float,
+    rightEdgeOutput: Float,
+    x: Float
 ) = when (type) {
     Extrapolation.IDENTITY -> x
     Extrapolation.EXTEND -> value
-    Extrapolation.CLAMP -> {
-        if (coefficient * value < coefficient * leftEdgeOutput) {
-            leftEdgeOutput
-        } else {
-            rightEdgeOutput
-        }
-    }
+    Extrapolation.CLAMP -> if (coefficient * value < coefficient * leftEdgeOutput) leftEdgeOutput else rightEdgeOutput
 }
 
 private fun checkInputsSize(inputSize: Int, outputSize: Int) {
@@ -115,7 +121,10 @@ private fun Extrapolation.requiredConfigFromType() = when (this) {
 }
 
 private data class InterpolatedInput(
-    var x1: Float, var y1: Float, var x2: Float, var y2: Float
+    var x1: Float,
+    var y1: Float,
+    var x2: Float,
+    var y2: Float
 )
 
 data class RequiredExtrapolationConfig(
